@@ -1,0 +1,11 @@
+streamlit
+pandas
+scikit-learn
+plotly
+orion-ml
+adtk
+altair
+plotly
+numpy
+keras
+io
