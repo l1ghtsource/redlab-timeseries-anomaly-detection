@@ -2,12 +2,11 @@ import streamlit as st
 import pandas as pd
 import altair as alt
 
-from ml.autoencoder import AER, AER_plot
-from ml.clusterization_and_knn import K_Means, KNN_Anom, KMeans_plot, KNN_plot
-from ml.adtk_algos import ADTK_KMeans, ADTK_OutlierDetector, ADTK_Pca, ADTK_plot
-from ml.isolation_forest import IF, IF_plot
-
-from ml.utils import getMean, getRange, getStd
+from ml.autoencoder import AnomaliesAER
+from ml.clusterization_and_knn import AnomaliesDetector
+from ml.adtk_algos import AnomaliesADTK
+from ml.isolation_forest import IsolationForestDetector
+from ml.utils import TimeSeriesStatsCalculator
 
 methods_list = ['Isolation Forest', 'K-Means', 'Outlier Detector',
                 'PCA', 'Autoencoder', 'K-Means (By Day)', 'KNN (By Day)']
@@ -30,9 +29,10 @@ alt.themes.enable('dark')
 
 @st.cache_data
 def find_anomalies_AER(timeseries):
-    anomalies = AER(timeseries)
+    aer = AnomaliesAER(timeseries)
+    anomalies = aer.detect_anomalies()
 
-    fig = AER_plot(timeseries, anomalies)
+    fig = aer.plot_anomalies()
     st.plotly_chart(fig)
 
     return pd.DataFrame(anomalies)
@@ -40,45 +40,49 @@ def find_anomalies_AER(timeseries):
 
 @st.cache_data
 def find_anomalies_kmeans(timeseries):
-    dd = K_Means(timeseries)
-    fig = KMeans_plot(dd)
+    detector = AnomaliesDetector(timeseries)
+    kmeans_anomalies = detector.k_means()
+
+    fig = detector.k_means_plot()
     st.plotly_chart(fig)
 
-    return dd.loc[dd.anomaly_cls == 1, ['datetime', 'value']].reset_index().drop(columns='index').rename(
-        columns={'datetime': 'timestamp'})
+    anomalies = kmeans_anomalies.loc[kmeans_anomalies.anomaly_cls == 1, ['datetime', 'value']]
+    return anomalies.reset_index().drop(columns='index').rename(columns={'datetime': 'timestamp'})
 
 
 @st.cache_data
 def find_anomalies_knn(timeseries):
-    dd_ = KNN_Anom(timeseries)
-    fig = KNN_plot(dd_)
+    detector = AnomaliesDetector(timeseries)
+    knn_anomalies = detector.knn_anom()
+
+    fig = detector.knn_plot()
     st.plotly_chart(fig)
 
-    return dd_.loc[dd_['anomaly_knn'], ['datetime', 'value']].reset_index().drop(columns='index').rename(
-        columns={'datetime': 'timestamp'})
+    anomalies = knn_anomalies.loc[knn_anomalies['anomaly_knn'], ['datetime', 'value']]
+    return anomalies.reset_index().drop(columns='index').rename(columns={'datetime': 'timestamp'})
 
 
 @st.cache_data
 def find_anomalies_iforest(timeseries):
-    dd = IF(timeseries)
-    df = dd[dd['anomaly'] == -1].drop(columns='anomaly').reset_index().drop(columns='index')
-    anomalies = dd.drop(columns='value').set_index('timestamp')
-    anomalies = anomalies['anomaly'].replace({-1: True, 1: False})
-    ts = dd.drop(columns='anomaly').set_index('timestamp')
+    detector = IsolationForestDetector()
+    detector.fit(timeseries)
 
-    fig = IF_plot(ts, anomalies)
+    fig = detector.plot()
     st.plotly_chart(fig)
 
-    return df
+    anomalies_df = detector.df[detector.df['anomaly'] == -1].drop(columns='anomaly').reset_index().drop(columns='index')
+
+    return anomalies_df
 
 
 @st.cache_data
 def find_anomalies_adtk_kmeans(timeseries_idx):
-    anomalies = ADTK_KMeans(timeseries_idx)
+    adtk = AnomaliesADTK(timeseries_idx)
+    anomalies = adtk.detect_kmeans()
     anomaly_df = pd.DataFrame(anomalies)
     anomaly_df = anomaly_df.loc[anomaly_df[0] == 1]
 
-    fig = ADTK_plot(timeseries_idx, anomalies, 'K-MEANS')
+    fig = adtk.plot_anomalies(anomalies, 'K-MEANS')
     st.plotly_chart(fig)
 
     idx = anomaly_df.index.tolist()
@@ -87,11 +91,12 @@ def find_anomalies_adtk_kmeans(timeseries_idx):
 
 @st.cache_data
 def find_anomalies_adtk_outlier_detector(timeseries_idx):
-    anomalies = ADTK_OutlierDetector(timeseries_idx)
+    adtk = AnomaliesADTK(timeseries_idx)
+    anomalies = adtk.detect_outliers()
     anomaly_df = pd.DataFrame(anomalies)
     anomaly_df = anomaly_df.loc[anomaly_df[0] == 1]
 
-    fig = ADTK_plot(timeseries_idx, anomalies, 'Outlier Detector')
+    fig = adtk.plot_anomalies(anomalies, 'Outlier Detector')
     st.plotly_chart(fig)
 
     idx = anomaly_df.index.tolist()
@@ -100,12 +105,12 @@ def find_anomalies_adtk_outlier_detector(timeseries_idx):
 
 @st.cache_data
 def find_anomalies_adtk_pca(timeseries_idx):
-
-    anomalies = ADTK_Pca(timeseries_idx)
+    adtk = AnomaliesADTK(timeseries_idx)
+    anomalies = adtk.detect_pca()
     anomaly_df = pd.DataFrame(anomalies)
     anomaly_df = anomaly_df.loc[anomaly_df[0] == 1]
 
-    fig = ADTK_plot(timeseries_idx, anomalies, 'PCA')
+    fig = adtk.plot_anomalies(anomalies, 'PCA')
     st.plotly_chart(fig)
 
     idx = anomaly_df.index.tolist()
@@ -114,9 +119,12 @@ def find_anomalies_adtk_pca(timeseries_idx):
 
 @st.cache_data
 def get_info(timeseries, anomaly_df):
-    range_of_series = getRange(timeseries)
-    mean_val = getMean(timeseries)
-    std_val = getStd(timeseries)
+    stats_calculator = TimeSeriesStatsCalculator(timeseries)
+
+    range_of_series = stats_calculator.get_range()
+    mean_val = stats_calculator.get_mean()
+    std_val = stats_calculator.get_std()
+
     anomalies_count = len(anomaly_df)
 
     return anomalies_count, range_of_series, mean_val, std_val

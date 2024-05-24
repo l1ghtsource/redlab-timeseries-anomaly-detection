@@ -1,26 +1,26 @@
 import pandas as pd
 
 
-def getRange(df):
-    df['timestamp'] = pd.to_datetime(df['timestamp'])
-    df = df.sort_values(by='timestamp')
+class TimeSeriesStatsCalculator:
+    def __init__(self, df):
+        self.df = df
 
-    range_of_series = df['value'].max() - df['value'].min()
+    def get_range(self):
+        self.df['timestamp'] = pd.to_datetime(self.df['timestamp'])
+        self.df = self.df.sort_values(by='timestamp')
 
-    return range_of_series
+        range_of_series = self.df['value'].max() - self.df['value'].min()
 
+        return range_of_series
 
-def getMean(df):
-    return df['value'].mean()
+    def get_mean(self):
+        return self.df['value'].mean()
 
+    def get_median(self):
+        return self.df['value'].median()
 
-def getMedian(df):
-    return df['value'].median()
+    def get_std(self):
+        return self.df['value'].std()
 
-
-def getStd(df):
-    return df['value'].std()
-
-
-def getVar(df):
-    return getStd(df) / getMean(df)
+    def get_var(self):
+        return self.get_std() / self.get_mean()

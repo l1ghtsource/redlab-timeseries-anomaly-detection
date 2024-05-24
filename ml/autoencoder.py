@@ -3,53 +3,58 @@ import plotly.graph_objects as go
 from orion import Orion
 
 
-def AER(data):
-    data['timestamp'] = pd.to_datetime(data['timestamp'])
-    data['timestamp'] = data['timestamp'].apply(lambda x: int(x.timestamp()))
+class AnomaliesAER:
+    def __init__(self, data):
+        self.data = data.copy()
+        self.data['timestamp'] = pd.to_datetime(self.data['timestamp'])
+        self.data['timestamp'] = self.data['timestamp'].apply(lambda x: int(x.timestamp()))
 
-    hyperparameters = {
-        'mlstars.custom.timeseries_preprocessing.time_segments_aggregate#1': {
-            'interval': 3600
-        },
-        'orion.primitives.aer.AER#1': {
-            'epochs': 5,
-            'verbose': True
-        }
-    }
+    def detect_anomalies(self, hyperparameters=None):
+        if hyperparameters is None:
+            hyperparameters = {
+                'mlstars.custom.timeseries_preprocessing.time_segments_aggregate#1': {
+                    'interval': 3600
+                },
+                'orion.primitives.aer.AER#1': {
+                    'epochs': 5,
+                    'verbose': True
+                }
+            }
 
-    orion = Orion(
-        pipeline='aer',
-        hyperparameters=hyperparameters
-    )
+        orion = Orion(
+            pipeline='aer',
+            hyperparameters=hyperparameters
+        )
 
-    orion.fit(data)
+        orion.fit(self.data)
 
-    anomalies = orion.detect(data)
+        self.anomalies = orion.detect(self.data)
 
-    return anomalies
+        return self.anomalies
 
+    def plot_anomalies(self):
+        data_copy = self.data.copy()
+        data_copy['timestamp'] = pd.to_datetime(data_copy['timestamp'], unit='s')
 
-def AER_plot(data, anomalies):
-    data['timestamp'] = pd.to_datetime(data['timestamp'], unit='s')
+        anomalies_copy = self.anomalies.copy()
+        anomalies_copy['start'] = pd.to_datetime(anomalies_copy['start'], unit='s')
+        anomalies_copy['end'] = pd.to_datetime(anomalies_copy['end'], unit='s')
 
-    anomalies['start'] = pd.to_datetime(anomalies['start'], unit='s')
-    anomalies['end'] = pd.to_datetime(anomalies['end'], unit='s')
+        fig = go.Figure()
 
-    fig = go.Figure()
-
-    fig.add_trace(go.Scatter(x=data['timestamp'],
-                             y=data['value'],
-                             mode='lines',
-                             name='Time Series'))
-
-    for _, row in anomalies.iterrows():
-        anomaly_range = data[(data['timestamp'] >= row['start']) & (data['timestamp'] <= row['end'])]
-        fig.add_trace(go.Scatter(x=anomaly_range['timestamp'],
-                                 y=anomaly_range['value'],
+        fig.add_trace(go.Scatter(x=data_copy['timestamp'],
+                                 y=data_copy['value'],
                                  mode='lines',
-                                 line=dict(color='red')))
+                                 name='Time Series'))
 
-    fig.update_layout(xaxis_title='Time',
-                      yaxis_title='Value',
-                      title='Anomalies in Time Series [AER]')
-    return fig
+        for _, row in anomalies_copy.iterrows():
+            anomaly_range = data_copy[(data_copy['timestamp'] >= row['start']) & (data_copy['timestamp'] <= row['end'])]
+            fig.add_trace(go.Scatter(x=anomaly_range['timestamp'],
+                                     y=anomaly_range['value'],
+                                     mode='lines',
+                                     line=dict(color='red')))
+
+        fig.update_layout(xaxis_title='Time',
+                          yaxis_title='Value',
+                          title='Anomalies in Time Series [AER]')
+        return fig

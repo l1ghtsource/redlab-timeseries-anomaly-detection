@@ -8,42 +8,37 @@ from adtk.detector import MinClusterDetector, OutlierDetector
 from adtk.detector import PcaAD
 
 
-def ADTK_OutlierDetector(s):
-    s = validate_series(s)
-    outlier_detector = OutlierDetector(LocalOutlierFactor(contamination=0.01))
-    anomalies_outlier = outlier_detector.fit_detect(s)
+class AnomaliesADTK:
+    def __init__(self, series):
+        self.series = validate_series(series)
 
-    return anomalies_outlier
+    def detect_outliers(self):
+        outlier_detector = OutlierDetector(LocalOutlierFactor(contamination=0.01))
+        self.anomalies_outlier = outlier_detector.fit_detect(self.series)
+        return self.anomalies_outlier
 
+    def detect_kmeans(self):
+        min_cluster_detector = MinClusterDetector(KMeans(n_clusters=3))
+        self.anomalies_clusterization = min_cluster_detector.fit_detect(self.series)
+        return self.anomalies_clusterization
 
-def ADTK_KMeans(s):
-    s = validate_series(s)
-    min_cluster_detector = MinClusterDetector(KMeans(n_clusters=3))
-    anomalies_clusterization = min_cluster_detector.fit_detect(s)
+    def detect_pca(self):
+        pca_ad = PcaAD(k=1)
+        self.anomalies_pca = pca_ad.fit_detect(self.series)
+        return self.anomalies_pca
 
-    return anomalies_clusterization
+    def plot_anomalies(self, anomalies, method):
+        fig = go.Figure()
 
+        fig.add_trace(go.Scatter(
+            x=self.series.index, y=self.series['value'], mode='lines', name='Value'))
 
-def ADTK_Pca(s):
-    s = validate_series(s)
-    pca_ad = PcaAD(k=1)
-    anomalies_pca = pca_ad.fit_detect(s)
+        anomaly_dates = anomalies[anomalies].index
+        fig.add_trace(go.Scatter(x=anomaly_dates, y=self.series.loc[anomaly_dates]['value'],
+                                 mode='markers', marker=dict(color='red'), name='Anomalies'))
 
-    return anomalies_pca
+        fig.update_layout(title=f'Anomalies in Time Series [ADTK {method}]',
+                          xaxis_title='Datetime',
+                          yaxis_title='Value')
 
-
-def ADTK_plot(s, anomalies, method):
-    fig = go.Figure()
-
-    fig.add_trace(go.Scatter(
-        x=s.index, y=s['value'], mode='lines', name='Value'))
-
-    anomaly_dates = anomalies[anomalies].index
-    fig.add_trace(go.Scatter(x=anomaly_dates, y=s.loc[anomaly_dates]['value'],
-                             mode='markers', marker=dict(color='red'), name='Anomalies'))
-
-    fig.update_layout(title=f'Anomalies in Time Series [ADTK {method}]',
-                      xaxis_title='Datetime',
-                      yaxis_title='Value')
-
-    return fig
+        return fig
