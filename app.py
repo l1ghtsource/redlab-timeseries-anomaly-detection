@@ -291,22 +291,22 @@ def main():
 
             start_date = st.date_input('Выберите начальную дату', min_value=min_date,
                                        max_value=max_date, value=min_date)
-            time_input_start = st.text_input('Введите время начала в формате hh:mm')
+            time_input_start = st.text_input('Введите время начала в формате hh mm (через двоеточие)')
 
             end_date = st.date_input('Выберите конечную дату', min_value=min_date, max_value=max_date, value=max_date)
-            time_input_end = st.text_input('Введите время конца в формате hh:mm')
-
-            start_datetime = pd.to_datetime(str(start_date).split()[0] + ' ' + time_input_start)
-            end_datetime = pd.to_datetime(str(end_date).split()[0] + ' ' + time_input_end)
+            time_input_end = st.text_input('Введите время конца в формате hh mm')
 
             if st.button("Применить фильтр"):
                 if validate_time_format(time_input_start) and validate_time_format(time_input_end):
+                    start_datetime = pd.to_datetime(str(start_date).split()[0] + ' ' + time_input_start)
+                    end_datetime = pd.to_datetime(str(end_date).split()[0] + ' ' + time_input_end)
+
                     st.session_state["state"] = "working"
                     st.session_state["start"] = start_datetime
                     st.session_state["end"] = end_datetime
                     st.rerun()
                 else:
-                    st.error('Некорректный формат времени. Пожалуйста, введите время в формате hh-mm.')
+                    st.error(f'Некорректный формат времени. Пожалуйста, введите время в формате hh mm (через двоеточие)')
 
         else:
             start_datetime = st.session_state["start"]
@@ -318,19 +318,22 @@ def main():
 
             start_date = st.date_input('Выберите начальную дату', min_value=min_date,
                                        max_value=max_date, value=min_date)
-            time_input_start = st.text_input('Введите время начала в формате hh:mm')
+            time_input_start = st.text_input('Введите время начала в формате hh mm')
 
             end_date = st.date_input('Выберите конечную дату', min_value=min_date, max_value=max_date, value=max_date)
-            time_input_end = st.text_input('Введите время конца в формате hh:mm')
-
-            start_datetime = pd.to_datetime(str(start_date).split()[0] + ' ' + time_input_start)
-            end_datetime = pd.to_datetime(str(end_date).split()[0] + ' ' + time_input_end)
+            time_input_end = st.text_input('Введите время конца в формате hh mm')
 
             if st.button("Применить фильтр"):
-                st.session_state["state"] = "working"
-                st.session_state["start"] = start_datetime
-                st.session_state["end"] = end_datetime
-                st.rerun()
+                if validate_time_format(time_input_start) and validate_time_format(time_input_end):
+                    start_datetime = pd.to_datetime(str(start_date).split()[0] + ' ' + time_input_start)
+                    end_datetime = pd.to_datetime(str(end_date).split()[0] + ' ' + time_input_end)
+
+                    st.session_state["state"] = "working"
+                    st.session_state["start"] = start_datetime
+                    st.session_state["end"] = end_datetime
+                    st.rerun()
+                else:
+                    st.error(f'Некорректный формат времени. Пожалуйста, введите время в формате hh mm')
 
             st.download_button(
                 label="Скачать отчёты CSV",
