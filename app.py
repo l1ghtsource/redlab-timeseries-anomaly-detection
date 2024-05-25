@@ -187,6 +187,7 @@ def main():
             selected_method = st.selectbox('Выберите режим поиска аномалий', methods_list)
 
             timeseries = pd.concat([timeseries['timestamp'], timeseries[selected_value]], axis=1)
+            timeseries.rename(columns={selected_value: 'value'}, inplace=True)
 
             if st.button("Загрузить другой файл"):
                 st.session_state["state"] = "initial"
