@@ -1,5 +1,5 @@
 pyarrow
-streamlit==1.12.0
+streamlit
 altair==4
 pandas
 plotly
