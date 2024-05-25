@@ -4,6 +4,9 @@ import pandas as pd
 import altair as alt
 import plotly.express as px
 import plotly.graph_objects as go
+import zipfile
+import io
+from plotly.subplots import make_subplots
 
 from ml.autoencoder import AnomaliesAER
 from ml.isolation_forest import IsolationForestDetector
@@ -13,6 +16,23 @@ from ml.utils import TimeSeriesStatsCalculator
 def download_csv(df):
     csv = df.to_csv(index=False)
     return csv
+
+
+def download_zip(data):
+    zip_buffer = io.BytesIO()
+
+    dataframes = [x[0] for x in data]
+    names = [x[1] for x in data]
+
+    with zipfile.ZipFile(zip_buffer, 'a', zipfile.ZIP_DEFLATED, False) as zip_file:
+        for index, df in enumerate(dataframes):
+            csv_buffer = io.StringIO()
+            df.to_csv(csv_buffer, index=False)
+            csv_buffer.seek(0)
+            zip_file.writestr(f'{names[index]}_anomalies.csv', csv_buffer.read())
+
+    zip_buffer.seek(0)
+    return zip_buffer.getvalue()
 
 
 st.set_page_config(
@@ -113,7 +133,41 @@ def find_anomalies(method, timeseries, start, end):
         return anomalies_df
 
     elif method == 'Multidimensional':
-        pass
+        fig = make_subplots(rows=len(timeseries.columns) - 1, cols=1, shared_xaxes=True,
+                            subplot_titles=[f"Anomalies in {column}"
+                                            for column in timeseries.columns[1:]])
+        results = []
+
+        for i, column in enumerate(timeseries.columns[1:]):
+            ts = timeseries[['timestamp', column]]
+            ts.rename(columns={column: 'value'}, inplace=True)
+
+            df = find_anomalies_iforest(ts)
+
+            df = df[(pd.to_datetime(df['timestamp']) >= start) & (pd.to_datetime(df['timestamp']) <= end)]
+
+            anomalies_df = df[df['anomaly'] == -1].drop(columns='anomaly').reset_index().drop(columns='index')
+
+            fig.add_trace(go.Scatter(x=df.index, y=df['value'], mode='lines', name='Value'), row=i+1, col=1)
+
+            anomaly_dates = df[df['anomaly'] == -1].index
+            fig.add_trace(
+                go.Scatter(
+                    x=anomaly_dates, y=df.loc[anomaly_dates]['value'],
+                    mode='markers', marker=dict(color='red'),
+                    name='Anomalies'),
+                row=i + 1, col=1)
+
+            results.append([anomalies_df, column])
+
+        fig.update_layout(height=200*len(timeseries.columns),
+                          title_text="Anomalies in Multidimensional Time Series [Isolation Forest]",
+                          xaxis_title='Time',
+                          showlegend=False)
+
+        st.plotly_chart(fig, use_container_width=True)
+
+        return results
 
 
 def main():
@@ -239,7 +293,31 @@ def main():
                 st.rerun()
 
         else:
-            pass
+            start_datetime = st.session_state["start"]
+            end_datetime = st.session_state["end"]
+            results = find_anomalies('Multidimensional', timeseries_all, start_datetime, end_datetime)
+
+            min_date = pd.to_datetime(timeseries_all['timestamp'].min())
+            max_date = pd.to_datetime(timeseries_all['timestamp'].max())
+
+            start_date = st.date_input('Выберите начальную дату', min_value=min_date,
+                                       max_value=max_date, value=min_date)
+            end_date = st.date_input('Выберите конечную дату', min_value=min_date, max_value=max_date, value=max_date)
+
+            start_datetime = pd.to_datetime(start_date)
+            end_datetime = pd.to_datetime(end_date)
+
+            if st.button("Применить фильтр"):
+                st.session_state["state"] = "working"
+                st.session_state["start"] = start_datetime
+                st.session_state["end"] = end_datetime
+                st.rerun()
+
+            st.download_button(
+                label="Скачать отчёты CSV",
+                data=download_zip(results),
+                file_name=f'anomalies_{selected_method}.zip'
+            )
 
     elif state == "analyse":
         timeseries_all = st.session_state["data"]
