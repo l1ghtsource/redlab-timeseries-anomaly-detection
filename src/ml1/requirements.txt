@@ -1,0 +1,4 @@
+pandas
+orion-ml
+faststream[kafka]
+clickhouse_connect

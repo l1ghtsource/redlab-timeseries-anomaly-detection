@@ -1,0 +1,6 @@
+pyarrow
+streamlit
+altair
+pandas
+plotly
+clickhouse_connect
