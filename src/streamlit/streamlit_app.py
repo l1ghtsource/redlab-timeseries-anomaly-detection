@@ -7,7 +7,7 @@ import zipfile
 import io
 import requests
 from plotly.subplots import make_subplots
-
+import clickhouse_connect
 
 class TimeSeriesStatsCalculator:
     def __init__(self, df):
@@ -67,9 +67,9 @@ st.set_page_config(
 alt.themes.enable('dark')
 
 
-@st.cache_data
+#@st.cache_data
 def find_anomalies_AER(column_name): #timeseries):
-    csv_io = io.StringIO(requests.get('http://api/find', json={'models': ['Autoencoder'], 'column_name': column_name}).json()['Autoencoder'])
+    csv_io = io.StringIO(requests.get('http://api:8000/find', json={'models': ['Autoencoder'], 'column_name': column_name}).json()['Autoencoder'])
     return pd.read_csv(csv_io)
 
     #aer = AnomaliesAER(timeseries)
@@ -78,9 +78,9 @@ def find_anomalies_AER(column_name): #timeseries):
     #return anomalies
 
 
-@st.cache_data
+#@st.cache_data
 def find_anomalies_iforest(column_name):
-    csv_io = io.StringIO(requests.get('http://api/find', json={'models': ['Isolation Forest'], 'column_name': column_name}).json()['Isolation Forest'])
+    csv_io = io.StringIO(requests.get('http://api:8000/find', json={'models': ['Isolation Forest'], 'column_name': column_name}).json()['Isolation Forest'])
     return pd.read_csv(csv_io)
 
     detector = IsolationForestDetector()
@@ -170,7 +170,7 @@ def find_anomalies(method, timeseries, start, end, selected_value):
             ts = timeseries[['timestamp', column]]
             ts.rename(columns={column: 'value'}, inplace=True)
 
-            df = find_anomalies_iforest(ts)
+            df = find_anomalies_iforest(column)
 
             df = df[(pd.to_datetime(df['timestamp']) >= start) & (pd.to_datetime(df['timestamp']) <= end)]
 
@@ -204,7 +204,7 @@ def main():
     if state == "initial":
         st.title('📉 Поиск Аномалий во Временных Рядах')
 
-        uploaded_file = st.file_uploader("Выберите CSV файл", type=['csv'])
+        uploaded_file = st.file_uploader("Выберите CSV файл (недоступно, используется ClickHouse)", type=['csv'], disabled=True)
         if uploaded_file is not None:
             st.session_state["data"] = pd.read_csv(uploaded_file)
             st.session_state["state"] = "working"

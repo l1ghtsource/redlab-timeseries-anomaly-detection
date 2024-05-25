@@ -5,7 +5,7 @@ import uvicorn
 
 from faststream.kafka.fastapi import KafkaRouter, Logger
 
-router = KafkaRouter("kafka:9092")
+router = KafkaRouter("kafka:9092", max_request_size=16000000)
 
 
 responses_ml1 = dict()
@@ -16,7 +16,7 @@ def call():
 
 @router.subscriber("from_ml1")
 async def from_ml1(data, msg_id, d=Depends(call)):
-    print('from ml1', data, msg_id)
+    print('from ml1', data, "msg_ID=", msg_id)
     if responses_ml1[msg_id] == 'timed_out':
         responses_ml1.pop(msg_id)
     else:
@@ -34,8 +34,12 @@ app = FastAPI(lifespan=router.lifespan_context)
 app.include_router(router)
 
 @app.get("/find")
-async def root(data={'models': ['Autoencoder', 'Isolation Forest'], 'column_name': 'web_response'}):
-    print(data)
+async def root(data: dict | None = None):
+    #data =  
+    if data is None:
+        data = {'models': ['Autoencoder', 'Isolation Forest'], 'column_name': 'web_response'}
+    #print('DATA:          ', data)
+    #return data
     msg_id = max([len(responses_ml1), len(responses_ml2)])
     responses_ml1[msg_id] = 'pending'
     responses_ml2[msg_id] = 'pending'
@@ -44,7 +48,7 @@ async def root(data={'models': ['Autoencoder', 'Isolation Forest'], 'column_name
     if 'Isolation Forest' in data['models']:
         await router.broker.publish({"msg_id": msg_id, 'column_name': data['column_name'], 'data_source': 'default'}, "to_ml2")
     try:
-        async with asyncio.timeout(60):
+        async with asyncio.timeout(120):
             while True:
                 rdy = 0
                 if ('Autoencoder' in data['models']) and (responses_ml1[msg_id] != 'pending'):

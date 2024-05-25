@@ -24,6 +24,14 @@ services:
     depends_on:
       - kafka
     restart: unless-stopped
+
+  ml2:
+    build:
+      dockerfile: Dockerfile
+      context: ml2
+    depends_on:
+      - kafka
+    restart: unless-stopped
     
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.4
@@ -48,3 +56,5 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_MESSAGE_MAX_BYTES: 10000000
+      KAFKA_SOCKET_REQUEST_MAX_BYTES: 100001200
