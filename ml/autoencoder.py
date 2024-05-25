@@ -16,7 +16,7 @@ class AnomaliesAER:
                     'interval': 300
                 },
                 'orion.primitives.aer.AER#1': {
-                    'epochs': 3,
+                    'epochs': 1,
                     'verbose': True
                 }
             }
@@ -26,7 +26,7 @@ class AnomaliesAER:
             hyperparameters=hyperparameters
         )
 
-        orion.fit(self.data)
+        orion.fit(self.data[30000:35000])
 
         self.anomalies = orion.detect(self.data)
 
