@@ -26,7 +26,7 @@ class AnomaliesAER:
             hyperparameters=hyperparameters
         )
 
-        orion.fit(self.data[30000:35000])
+        orion.fit(self.data[int(0.6*len(self.data)):int(0.7*len(self.data))])
 
         self.anomalies = orion.detect(self.data)
 
