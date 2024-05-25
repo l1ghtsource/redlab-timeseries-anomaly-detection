@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
+import plotly.express as px
 
 from ml.autoencoder import AnomaliesAER
 from ml.clusterization_and_knn import AnomaliesDetector
@@ -172,7 +173,7 @@ def main():
             st.rerun()
 
     elif state == "working":
-        timeseries = st.session_state["data"]
+        timeseries_all = st.session_state["data"]
 
         with st.sidebar:
             st.title('📉 Поиск Аномалий во Временных Рядах')
@@ -187,13 +188,13 @@ def main():
                 # 'KNN (By Day)'
             ]
 
-            numeric_columns = timeseries.select_dtypes(include=['float', 'int'])
+            numeric_columns = timeseries_all.select_dtypes(include=['float', 'int'])
             numeric_column_names = numeric_columns.columns.tolist()
 
             selected_value = st.selectbox('Выберите столбец для поиска аномалий', numeric_column_names)
             selected_method = st.selectbox('Выберите режим поиска аномалий', methods_list)
 
-            timeseries = pd.concat([timeseries['timestamp'], timeseries[selected_value]], axis=1)
+            timeseries = pd.concat([timeseries_all['timestamp'], timeseries_all[selected_value]], axis=1)
             timeseries.rename(columns={selected_value: 'value'}, inplace=True)
 
             if st.button("Загрузить другой файл"):
@@ -250,6 +251,8 @@ def main():
             )
 
     elif state == "analyse":
+        timeseries_all = st.session_state["data"]
+
         with st.sidebar:
             st.title('📉 Анализ временного ряда')
 
@@ -267,6 +270,30 @@ def main():
             elif st.button("Вернуться к поиску аномалий"):
                 st.session_state["state"] = "working"
                 st.rerun()
+
+        if selected_method == 'Тепловая карта корелляционной матрицы':
+            stats_calculator = TimeSeriesStatsCalculator(timeseries_all)
+            corr_matrix = stats_calculator.get_correlation().round(2)
+
+            fig = px.imshow(corr_matrix, text_auto=True, aspect="auto", color_continuous_scale="blugrn")
+            fig.update_layout(title='Тепловая карта корелляционной матрицы')
+
+            st.plotly_chart(fig)
+
+            corr_pairs = corr_matrix > 0.9
+
+            pairs = []
+            for i in range(len(corr_matrix.columns)):
+                for j in range(i+1, len(corr_matrix.columns)):
+                    if corr_pairs.iloc[i, j]:
+                        pairs.append((corr_matrix.columns[i], corr_matrix.columns[j], corr_matrix.iloc[i, j]))
+
+            res = 'Пары с корелляцией > 0.9: '
+
+            for pair in pairs:
+                res += f'{pair[0]} и {pair[1]} ({pair[2]})'
+
+            st.write(res)
 
 
 if __name__ == "__main__":

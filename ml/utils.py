@@ -24,3 +24,6 @@ class TimeSeriesStatsCalculator:
 
     def get_var(self):
         return self.get_std() / self.get_mean()
+
+    def get_correlation(self):
+        return self.df.corr().abs()
