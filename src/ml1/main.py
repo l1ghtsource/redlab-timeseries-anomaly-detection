@@ -39,7 +39,7 @@ class AnomaliesAER:
         return self.anomalies
 
 default_client = clickhouse_connect.get_client(host='83.166.235.106', port=8123)
-timeseries_all = default_client.query_df('SELECT timestamp as time, web_response, throughput, apdex, aperrordex FROM "default"."test2" ORDER BY time ASC')
+timeseries_all = default_client.query_df('SELECT timestamp as time, web_response, throughput, apdex, error FROM "default"."test2" ORDER BY time ASC')
 timeseries_all.rename(columns={'time': 'timestamp'}, inplace=True)
 
 @broker.subscriber("to_ml1")
