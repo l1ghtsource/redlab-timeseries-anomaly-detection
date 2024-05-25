@@ -1,4 +1,3 @@
-import plotly.graph_objects as go
 from sklearn.ensemble import IsolationForest
 
 SEED = sum(ord(ch) for ch in 'MISISFOUNDHACK')
@@ -21,26 +20,3 @@ class IsolationForestDetector:
         df['anomaly'] = self.model.predict(X)
         self.df = df
         return df
-
-    def plot(self):
-        if not hasattr(self, 'df'):
-            raise ValueError("No fit data found. Please run fit() first.")
-
-        s = self.df
-
-        anomalies = s['anomaly'] == -1
-
-        fig = go.Figure()
-
-        fig.add_trace(go.Scatter(
-            x=s.index, y=s['value'], mode='lines', name='Value'))
-
-        anomaly_dates = s[anomalies].index
-        fig.add_trace(go.Scatter(x=anomaly_dates, y=s.loc[anomaly_dates]['value'],
-                                 mode='markers', marker=dict(color='red'), name='Anomalies'))
-
-        fig.update_layout(title=f'Anomalies in Time Series [Isolation Forest]',
-                          xaxis_title='Datetime',
-                          yaxis_title='Value')
-
-        return fig
