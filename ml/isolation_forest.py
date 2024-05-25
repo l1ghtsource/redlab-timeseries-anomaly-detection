@@ -5,7 +5,7 @@ SEED = sum(ord(ch) for ch in 'MISISFOUNDHACK')
 
 
 class IsolationForestDetector:
-    def __init__(self, contamination=0.005, n_estimators=200, max_samples=0.7, random_state=SEED):
+    def __init__(self, contamination=0.001, n_estimators=200, max_samples=0.7, random_state=SEED):
         self.contamination = contamination
         self.n_estimators = n_estimators
         self.max_samples = max_samples
