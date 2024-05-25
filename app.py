@@ -329,10 +329,10 @@ def main():
 
             start_date = st.date_input('Выберите начальную дату', min_value=min_date,
                                        max_value=max_date, value=min_date)
-            time_input_start = st.text_input('Введите время начала в формате hh mm (через двоеточие)')
+            time_input_start = st.text_input('Введите время начала в формате hh mm', value='00:00')
 
             end_date = st.date_input('Выберите конечную дату', min_value=min_date, max_value=max_date, value=max_date)
-            time_input_end = st.text_input('Введите время конца в формате hh mm')
+            time_input_end = st.text_input('Введите время конца в формате hh mm', value='00:00')
 
             if st.button("Применить фильтр"):
                 if validate_time_format(time_input_start) and validate_time_format(time_input_end):
@@ -356,10 +356,10 @@ def main():
 
             start_date = st.date_input('Выберите начальную дату', min_value=min_date,
                                        max_value=max_date, value=min_date)
-            time_input_start = st.text_input('Введите время начала в формате hh mm')
+            time_input_start = st.text_input('Введите время начала в формате hh mm', value='00:00')
 
             end_date = st.date_input('Выберите конечную дату', min_value=min_date, max_value=max_date, value=max_date)
-            time_input_end = st.text_input('Введите время конца в формате hh mm')
+            time_input_end = st.text_input('Введите время конца в формате hh mm', value='00:00')
 
             if st.button("Применить фильтр"):
                 if validate_time_format(time_input_start) and validate_time_format(time_input_end):
