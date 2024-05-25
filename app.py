@@ -197,7 +197,7 @@ def main():
         if st.button("Использовать логи из БД"):
             client = clickhouse_connect.get_client(host='83.166.235.106', port=8123)
             result = client.query_df(
-                'SELECT timestamp as time, web_response, throughput, apdex, aperrordex FROM "default"."test2" ORDER BY time ASC')
+                'SELECT timestamp as time, web_response, throughput, apdex, error FROM "default"."test2" ORDER BY time ASC')
             result.rename(columns={'time': 'timestamp'}, inplace=True)
 
             st.session_state["data"] = result
