@@ -32,7 +32,16 @@ services:
     depends_on:
       - kafka
     restart: unless-stopped
+
+  ml3:
+    build:
+      dockerfile: Dockerfile
+      context: ml3
+    depends_on:
+      - kafka
+    restart: unless-stopped
     
+
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.4
     environment:

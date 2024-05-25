@@ -1,0 +1,4 @@
+pandas
+prophet
+faststream[kafka]
+clickhouse_connect

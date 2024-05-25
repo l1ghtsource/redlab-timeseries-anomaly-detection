@@ -72,21 +72,17 @@ def find_anomalies_AER(column_name): #timeseries):
     csv_io = io.StringIO(requests.get('http://api:8000/find', json={'models': ['Autoencoder'], 'column_name': column_name}).json()['Autoencoder'])
     return pd.read_csv(csv_io)
 
-    #aer = AnomaliesAER(timeseries)
-    #anomalies = pd.DataFrame(aer.detect_anomalies())
-
-    #return anomalies
-
 
 #@st.cache_data
 def find_anomalies_iforest(column_name):
     csv_io = io.StringIO(requests.get('http://api:8000/find', json={'models': ['Isolation Forest'], 'column_name': column_name}).json()['Isolation Forest'])
     return pd.read_csv(csv_io)
 
-    detector = IsolationForestDetector()
-    detector.fit(timeseries)
 
-    return detector.df
+#
+def find_anomalies_prophet(column_name):
+    csv_io = io.StringIO(requests.get('http://api:8000/find', json={'models': ['Prophet'], 'column_name': column_name}).json()['Prophet'])
+    return pd.read_csv(csv_io)
 
 
 @st.cache_data
@@ -153,6 +149,34 @@ def find_anomalies(method, timeseries, start, end, selected_value):
                                  mode='markers', marker=dict(color='red'), name='Anomalies'))
 
         fig.update_layout(title=f'Anomalies in Time Series [Isolation Forest]',
+                          xaxis_title='Datetime',
+                          yaxis_title='Value')
+
+        st.plotly_chart(fig)
+
+        return anomalies_df
+
+        elif method == 'Prophet':
+        anomalies_df = find_anomalies_prophet(timeseries)
+
+        anomalies_df = anomalies_df[(pd.to_datetime(anomalies_df['timestamp']) >= start)
+                                    & (pd.to_datetime(anomalies_df['timestamp']) <= end)]
+
+        timeseries = timeseries[(timeseries['timestamp'] >= start) & (timeseries['timestamp'] <= end)]
+
+        fig = go.Figure()
+
+        fig.add_trace(go.Scatter(x=timeseries['timestamp'], y=timeseries['value'], mode='lines', name='Value'))
+
+        anomaly_dates = anomalies_df['timestamp']
+
+        fig.add_trace(
+            go.Scatter(
+                x=anomaly_dates, y=anomalies_df.loc[anomalies_df['timestamp'] == anomaly_dates]['value'],
+                mode='markers', marker=dict(color='red'),
+                name='Anomalies'))
+
+        fig.update_layout(title='Anomalies in Time Series [Prophet]',
                           xaxis_title='Datetime',
                           yaxis_title='Value')
 
@@ -233,6 +257,7 @@ def main():
             methods_list = [
                 'Isolation Forest',
                 'Autoencoder',
+                'Prophet',
                 'Multidimensional'
             ]
 
