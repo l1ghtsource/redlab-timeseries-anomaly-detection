@@ -28,13 +28,3 @@ Cлепок данных телеметрии реальной системы д
 ## Предложенное решение
 
 solution
-  
-Ноутбуки с тестированием идей и разработкой решения: [notebooks](https://github.com/l1ghtsource/redlab-timeseries-anomaly-detection/tree/main/notebooks)
-
-ML алгоритмы: [ml](https://github.com/l1ghtsource/redlab-timeseries-anomaly-detection/tree/main/ml)
-
-Извлеченные данные: [data](https://github.com/l1ghtsource/redlab-timeseries-anomaly-detection/tree/main/data)
-
-Веб-сервис: [app](https://github.com/l1ghtsource/redlab-timeseries-anomaly-detection/tree/main/app.py)
-
-API: [api](https://github.com/l1ghtsource/redlab-timeseries-anomaly-detection/tree/main/api.py)
