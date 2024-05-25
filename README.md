@@ -23,7 +23,7 @@ API: link
 
 Cлепок данных телеметрии реальной системы для анализа и обучения модели. Данные представляют собой выгрузку из Clickhouse в формате TSV. 
 
-Набор колонок для metrics_collector: *account_id, name, point, call_count, total_call_time, total_exclusive_time, min_call_time, max_call_time, sum_of_squares, instances, language, app_name, app_id, scope, host, display_host, pid, agent_version, labels*
+Ключевые метрики: *Web Response, Throughput, APDEX, Error*
 
 ## Предложенное решение
 
