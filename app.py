@@ -8,16 +8,6 @@ from ml.adtk_algos import AnomaliesADTK
 from ml.isolation_forest import IsolationForestDetector
 from ml.utils import TimeSeriesStatsCalculator
 
-methods_list = [
-    'Isolation Forest',
-    'K-Means',
-    # 'Outlier Detector',
-    'PCA',
-    'Autoencoder',
-    'K-Means (By Day)',
-    'KNN (By Day)'
-]
-
 
 def download_csv(df):
     csv = df.to_csv(index=False)
@@ -187,6 +177,16 @@ def main():
         with st.sidebar:
             st.title('📉 Поиск Аномалий во Временных Рядах')
 
+            methods_list = [
+                'Isolation Forest',
+                # 'K-Means',
+                # 'Outlier Detector',
+                # 'PCA',
+                'Autoencoder',
+                # 'K-Means (By Day)',
+                # 'KNN (By Day)'
+            ]
+
             numeric_columns = timeseries.select_dtypes(include=['float', 'int'])
             numeric_column_names = numeric_columns.columns.tolist()
 
@@ -198,6 +198,10 @@ def main():
 
             if st.button("Загрузить другой файл"):
                 st.session_state["state"] = "initial"
+                st.rerun()
+
+            elif st.button("Анализ временного ряда"):
+                st.session_state["state"] = "analyse"
                 st.rerun()
 
         col = st.columns((1.5, 4.5, 2), gap='medium')
@@ -244,6 +248,25 @@ def main():
                 file_name=f'anomalies_{selected_method}.csv',
                 mime='text/csv'
             )
+
+    elif state == "analyse":
+        with st.sidebar:
+            st.title('📉 Анализ временного ряда')
+
+            methods_list = [
+                'Тепловая карта корелляционной матрицы',
+                'Анализ причинно-следственных связей'
+            ]
+
+            selected_method = st.selectbox('Выберите режим работы', methods_list)
+
+            if st.button("Загрузить другой файл"):
+                st.session_state["state"] = "initial"
+                st.rerun()
+
+            elif st.button("Вернуться к поиску аномалий"):
+                st.session_state["state"] = "working"
+                st.rerun()
 
 
 if __name__ == "__main__":

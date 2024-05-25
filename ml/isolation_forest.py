@@ -27,6 +27,7 @@ class IsolationForestDetector:
             raise ValueError("No fit data found. Please run fit() first.")
 
         s = self.df
+
         anomalies = s['anomaly'] == -1
 
         fig = go.Figure()
