@@ -8,8 +8,15 @@ from ml.adtk_algos import AnomaliesADTK
 from ml.isolation_forest import IsolationForestDetector
 from ml.utils import TimeSeriesStatsCalculator
 
-methods_list = ['Isolation Forest', 'K-Means', 'Outlier Detector',
-                'PCA', 'Autoencoder', 'K-Means (By Day)', 'KNN (By Day)']
+methods_list = [
+    'Isolation Forest',
+    'K-Means',
+    # 'Outlier Detector',
+    'PCA',
+    'Autoencoder',
+    'K-Means (By Day)',
+    'KNN (By Day)'
+]
 
 
 def download_csv(df):

@@ -13,7 +13,7 @@ class AnomaliesADTK:
         self.series = validate_series(series)
 
     def detect_outliers(self):
-        outlier_detector = OutlierDetector(LocalOutlierFactor(contamination=0.01))
+        outlier_detector = OutlierDetector(LocalOutlierFactor(contamination=0.0005))
         self.anomalies_outlier = outlier_detector.fit_detect(self.series)
         return self.anomalies_outlier
 
