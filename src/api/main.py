@@ -44,7 +44,7 @@ async def root(data={'models': ['Autoencoder', 'Isolation Forest'], 'column_name
     if 'Isolation Forest' in data['models']:
         await router.broker.publish({"msg_id": msg_id, 'column_name': data['column_name'], 'data_source': 'default'}, "to_ml2")
     try:
-        async with asyncio.timeout(12):
+        async with asyncio.timeout(60):
             while True:
                 rdy = 0
                 if ('Autoencoder' in data['models']) and (responses_ml1[msg_id] != 'pending'):
