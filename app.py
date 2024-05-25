@@ -6,6 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import zipfile
 import io
+import re
 from plotly.subplots import make_subplots
 
 from ml.autoencoder import AnomaliesAER
@@ -33,6 +34,15 @@ def download_zip(data):
 
     zip_buffer.seek(0)
     return zip_buffer.getvalue()
+
+
+def validate_time_format(time_str):
+    pattern = re.compile(r'^\d{2}:\d{2}$')
+    if pattern.match(time_str):
+        hours, minutes = map(int, time_str.split(':'))
+        if 0 <= hours < 24 and 0 <= minutes < 60:
+            return True
+    return False
 
 
 st.set_page_config(
@@ -281,16 +291,22 @@ def main():
 
             start_date = st.date_input('Выберите начальную дату', min_value=min_date,
                                        max_value=max_date, value=min_date)
-            end_date = st.date_input('Выберите конечную дату', min_value=min_date, max_value=max_date, value=max_date)
+            time_input_start = st.text_input('Введите время начала в формате hh-mm')
 
-            start_datetime = pd.to_datetime(start_date)
-            end_datetime = pd.to_datetime(end_date)
+            end_date = st.date_input('Выберите конечную дату', min_value=min_date, max_value=max_date, value=max_date)
+            time_input_end = st.text_input('Введите время конца в формате hh:mm')
+
+            start_datetime = pd.to_datetime(str(start_date).split()[0] + ' ' + time_input_start)
+            end_datetime = pd.to_datetime(str(end_date).split()[0] + ' ' + time_input_end)
 
             if st.button("Применить фильтр"):
-                st.session_state["state"] = "working"
-                st.session_state["start"] = start_datetime
-                st.session_state["end"] = end_datetime
-                st.rerun()
+                if validate_time_format(time_input_start) and validate_time_format(time_input_end):
+                    st.session_state["state"] = "working"
+                    st.session_state["start"] = start_datetime
+                    st.session_state["end"] = end_datetime
+                    st.rerun()
+                else:
+                    st.error('Некорректный формат времени. Пожалуйста, введите время в формате hh-mm.')
 
         else:
             start_datetime = st.session_state["start"]
@@ -300,12 +316,14 @@ def main():
             min_date = pd.to_datetime(timeseries_all['timestamp'].min())
             max_date = pd.to_datetime(timeseries_all['timestamp'].max())
 
-            start_date = st.date_input('Выберите начальную дату', min_value=min_date,
-                                       max_value=max_date, value=min_date)
             end_date = st.date_input('Выберите конечную дату', min_value=min_date, max_value=max_date, value=max_date)
+            time_input_end = st.text_input('Введите время конца в формате hh:mm')
 
-            start_datetime = pd.to_datetime(start_date)
-            end_datetime = pd.to_datetime(end_date)
+            start_datetime = pd.to_datetime(str(start_date).split()[0] + ' ' + time_input_start)
+            end_datetime = pd.to_datetime(str(end_date).split()[0] + ' ' + time_input_end)
+
+            start_datetime = pd.to_datetime(str(start_date).split()[0] + ' ' + time_input_start)
+            end_datetime = pd.to_datetime(str(end_date).split()[0] + ' ' + time_input_end)
 
             if st.button("Применить фильтр"):
                 st.session_state["state"] = "working"
