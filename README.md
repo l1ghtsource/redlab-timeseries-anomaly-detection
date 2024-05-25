@@ -11,9 +11,9 @@ Team Members:
 
 Презентация: [link](https://drive.google.com/)
 
-Frontend: <link>
+Frontend: link
 
-API: <link>
+API: link
 
 ## Задача трека "Разработка модели для выявления аномалий во временном ряду"
 
@@ -25,9 +25,7 @@ Cлепок данных телеметрии реальной системы д
 
 ## Предложенное решение
 
-![pipe](scheme.jpg)
-
-<solution>
+solution
   
 Ноутбуки с тестированием идей и разработкой решения: [notebooks](https://github.com/l1ghtsource/redlab-timeseries-anomaly-detection/tree/main/notebooks)
 ML алгоритмы: [ml](https://github.com/l1ghtsource/redlab-timeseries-anomaly-detection/tree/main/ml)
