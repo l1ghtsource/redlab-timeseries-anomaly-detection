@@ -129,7 +129,8 @@ def find_anomalies(method, timeseries, start, end):
 
     elif method == 'Isolation Forest':
         df = find_anomalies_iforest(timeseries)
-        anomalies_df = df[(pd.to_datetime(df['timestamp']) >= start) & (pd.to_datetime(df['timestamp']) <= end)]
+        df = df[(pd.to_datetime(df['timestamp']) >= start) & (pd.to_datetime(df['timestamp']) <= end)]
+        anomalies_df = df[df['anomaly'] == -1].drop(columns='anomaly').reset_index().drop(columns='index')
 
         timeseries['timestamp'] = pd.to_datetime(timeseries['timestamp'])
 
@@ -138,7 +139,7 @@ def find_anomalies(method, timeseries, start, end):
         fig.add_trace(go.Scatter(
             x=df.index, y=df['value'], mode='lines', name='Value'))
 
-        anomaly_dates = timeseries[timeseries['anomaly'] == -1].index
+        anomaly_dates = df[df['anomaly'] == -1].index
         fig.add_trace(go.Scatter(x=anomaly_dates, y=df.loc[anomaly_dates]['value'],
                                  mode='markers', marker=dict(color='red'), name='Anomalies'))
 
