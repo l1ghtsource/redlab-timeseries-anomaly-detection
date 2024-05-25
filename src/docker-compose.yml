@@ -5,6 +5,8 @@ services:
       context: streamlit
     ports:
      - "8501:8501"
+    restart: unless-stopped
+
   api:
     build:
       dockerfile: Dockerfile
@@ -13,19 +15,22 @@ services:
      - "8000:8000"
     depends_on:
       - kafka
-  
+    restart: unless-stopped
+
   ml1:
     build:
       dockerfile: Dockerfile
       context: ml1
     depends_on:
       - kafka
-  
+    restart: unless-stopped
+    
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.4
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    restart: unless-stopped
     #ports:
     #  - 22181:2181
   
@@ -35,6 +40,7 @@ services:
       - zookeeper
     #ports:
     #  - 29092:29092
+    restart: unless-stopped
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
