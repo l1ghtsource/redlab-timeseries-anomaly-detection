@@ -291,7 +291,7 @@ def main():
 
             start_date = st.date_input('Выберите начальную дату', min_value=min_date,
                                        max_value=max_date, value=min_date)
-            time_input_start = st.text_input('Введите время начала в формате hh-mm')
+            time_input_start = st.text_input('Введите время начала в формате hh:mm')
 
             end_date = st.date_input('Выберите конечную дату', min_value=min_date, max_value=max_date, value=max_date)
             time_input_end = st.text_input('Введите время конца в формате hh:mm')
@@ -316,11 +316,12 @@ def main():
             min_date = pd.to_datetime(timeseries_all['timestamp'].min())
             max_date = pd.to_datetime(timeseries_all['timestamp'].max())
 
+            start_date = st.date_input('Выберите начальную дату', min_value=min_date,
+                                       max_value=max_date, value=min_date)
+            time_input_start = st.text_input('Введите время начала в формате hh:mm')
+
             end_date = st.date_input('Выберите конечную дату', min_value=min_date, max_value=max_date, value=max_date)
             time_input_end = st.text_input('Введите время конца в формате hh:mm')
-
-            start_datetime = pd.to_datetime(str(start_date).split()[0] + ' ' + time_input_start)
-            end_datetime = pd.to_datetime(str(end_date).split()[0] + ' ' + time_input_end)
 
             start_datetime = pd.to_datetime(str(start_date).split()[0] + ' ' + time_input_start)
             end_datetime = pd.to_datetime(str(end_date).split()[0] + ' ' + time_input_end)
