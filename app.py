@@ -12,6 +12,7 @@ from plotly.subplots import make_subplots
 from ml.autoencoder import AnomaliesAER
 from ml.isolation_forest import IsolationForestDetector
 from ml.utils import TimeSeriesStatsCalculator
+from ml.prophet_detector import ProphetDetector
 
 
 def download_csv(df):
@@ -72,6 +73,14 @@ def find_anomalies_iforest(timeseries):
 
 
 @st.cache_data
+def find_anomalies_prophet(timeseries):
+    detector = ProphetDetector()
+    anomalies = detector.fit_predict(timeseries)
+
+    return anomalies
+
+
+@st.cache_data
 def get_info(timeseries, anomaly_df):
     stats_calculator = TimeSeriesStatsCalculator(timeseries)
 
@@ -120,21 +129,48 @@ def find_anomalies(method, timeseries, start, end):
 
     elif method == 'Isolation Forest':
         df = find_anomalies_iforest(timeseries)
+        anomalies_df = df[(pd.to_datetime(df['timestamp']) >= start) & (pd.to_datetime(df['timestamp']) <= end)]
 
-        df = df[(pd.to_datetime(df['timestamp']) >= start) & (pd.to_datetime(df['timestamp']) <= end)]
-
-        anomalies_df = df[df['anomaly'] == -1].drop(columns='anomaly').reset_index().drop(columns='index')
+        timeseries['timestamp'] = pd.to_datetime(timeseries['timestamp'])
 
         fig = go.Figure()
 
         fig.add_trace(go.Scatter(
             x=df.index, y=df['value'], mode='lines', name='Value'))
 
-        anomaly_dates = df[df['anomaly'] == -1].index
+        anomaly_dates = timeseries[timeseries['anomaly'] == -1].index
         fig.add_trace(go.Scatter(x=anomaly_dates, y=df.loc[anomaly_dates]['value'],
                                  mode='markers', marker=dict(color='red'), name='Anomalies'))
 
         fig.update_layout(title=f'Anomalies in Time Series [Isolation Forest]',
+                          xaxis_title='Datetime',
+                          yaxis_title='Value')
+
+        st.plotly_chart(fig)
+
+        return anomalies_df
+
+    elif method == 'Prophet':
+        anomalies_df = find_anomalies_prophet(timeseries)
+
+        anomalies_df = anomalies_df[(pd.to_datetime(anomalies_df['timestamp']) >= start)
+                                    & (pd.to_datetime(anomalies_df['timestamp']) <= end)]
+
+        timeseries = timeseries[(timeseries['timestamp'] >= start) & (timeseries['timestamp'] <= end)]
+
+        fig = go.Figure()
+
+        fig.add_trace(go.Scatter(x=timeseries['timestamp'], y=timeseries['value'], mode='lines', name='Value'))
+
+        anomaly_dates = anomalies_df['timestamp']
+
+        fig.add_trace(
+            go.Scatter(
+                x=anomaly_dates, y=anomalies_df.loc[anomalies_df['timestamp'] == anomaly_dates]['value'],
+                mode='markers', marker=dict(color='red'),
+                name='Anomalies'))
+
+        fig.update_layout(title='Anomalies in Time Series [Prophet]',
                           xaxis_title='Datetime',
                           yaxis_title='Value')
 
@@ -214,6 +250,7 @@ def main():
 
             methods_list = [
                 'Isolation Forest',
+                'Prophet',
                 'Autoencoder',
                 'Multidimensional'
             ]
