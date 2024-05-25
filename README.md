@@ -21,14 +21,20 @@ API: link
 
 ## Вводные данные
 
-Cлепок данных телеметрии реальной системы для анализа и обучения модели.
+Cлепок данных телеметрии реальной системы для анализа и обучения модели. Данные представляют собой выгрузку из Clickhouse в формате TSV. 
+
+Набор колонок для metrics_collector: *account_id, name, point, call_count, total_call_time, total_exclusive_time, min_call_time, max_call_time, sum_of_squares, instances, language, app_name, app_id, scope, host, display_host, pid, agent_version, labels*
 
 ## Предложенное решение
 
 solution
   
 Ноутбуки с тестированием идей и разработкой решения: [notebooks](https://github.com/l1ghtsource/redlab-timeseries-anomaly-detection/tree/main/notebooks)
+
 ML алгоритмы: [ml](https://github.com/l1ghtsource/redlab-timeseries-anomaly-detection/tree/main/ml)
+
 Извлеченные данные: [data](https://github.com/l1ghtsource/redlab-timeseries-anomaly-detection/tree/main/data)
+
 Веб-сервис: [app](https://github.com/l1ghtsource/redlab-timeseries-anomaly-detection/tree/main/app.py)
+
 API: [api](https://github.com/l1ghtsource/redlab-timeseries-anomaly-detection/tree/main/api.py)
