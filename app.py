@@ -1,3 +1,4 @@
+import clickhouse_connect
 import streamlit as st
 import pandas as pd
 import altair as alt
@@ -33,31 +34,11 @@ def find_anomalies_AER(timeseries):
 
 
 @st.cache_data
-def find_anomalies_iforest(timeseries, start, end):
+def find_anomalies_iforest(timeseries):
     detector = IsolationForestDetector()
     detector.fit(timeseries)
 
-    df = detector.df[(pd.to_datetime(detector.df['timestamp']) >= start)
-                     & (pd.to_datetime(detector.df['timestamp']) <= end)]
-
-    anomalies_df = df[df['anomaly'] == -1].drop(columns='anomaly').reset_index().drop(columns='index')
-
-    fig = go.Figure()
-
-    fig.add_trace(go.Scatter(
-        x=df.index, y=df['value'], mode='lines', name='Value'))
-
-    anomaly_dates = df[df['anomaly'] == -1].index
-    fig.add_trace(go.Scatter(x=anomaly_dates, y=df.loc[anomaly_dates]['value'],
-                             mode='markers', marker=dict(color='red'), name='Anomalies'))
-
-    fig.update_layout(title=f'Anomalies in Time Series [Isolation Forest]',
-                      xaxis_title='Datetime',
-                      yaxis_title='Value')
-
-    st.plotly_chart(fig)
-
-    return anomalies_df
+    return detector.df
 
 
 @st.cache_data
@@ -108,7 +89,28 @@ def find_anomalies(method, timeseries, start, end):
         return anomalies
 
     elif method == 'Isolation Forest':
-        return find_anomalies_iforest(timeseries, start, end)
+        df = find_anomalies_iforest(timeseries)
+
+        df = df[(pd.to_datetime(df['timestamp']) >= start) & (pd.to_datetime(df['timestamp']) <= end)]
+
+        anomalies_df = df[df['anomaly'] == -1].drop(columns='anomaly').reset_index().drop(columns='index')
+
+        fig = go.Figure()
+
+        fig.add_trace(go.Scatter(
+            x=df.index, y=df['value'], mode='lines', name='Value'))
+
+        anomaly_dates = df[df['anomaly'] == -1].index
+        fig.add_trace(go.Scatter(x=anomaly_dates, y=df.loc[anomaly_dates]['value'],
+                                 mode='markers', marker=dict(color='red'), name='Anomalies'))
+
+        fig.update_layout(title=f'Anomalies in Time Series [Isolation Forest]',
+                          xaxis_title='Datetime',
+                          yaxis_title='Value')
+
+        st.plotly_chart(fig)
+
+        return anomalies_df
 
     elif method == 'Multidimensional':
         pass
@@ -129,7 +131,12 @@ def main():
             st.rerun()
 
         if st.button("Использовать логи из БД"):
-            st.session_state["data"] = pd.read_csv(r'data\all_in_one.csv')
+            client = clickhouse_connect.get_client(host='83.166.235.106', port=8123)
+            result = client.query_df(
+                'SELECT timestamp as time, web_response, throughput, apdex, aperrordex FROM "default"."test2" ORDER BY time ASC')
+            result.rename(columns={'time': 'timestamp'}, inplace=True)
+
+            st.session_state["data"] = result
             st.session_state["state"] = "working"
             st.session_state["start"] = pd.to_datetime(st.session_state["data"]['timestamp'].min())
             st.session_state["end"] = pd.to_datetime(st.session_state["data"]['timestamp'].max())
