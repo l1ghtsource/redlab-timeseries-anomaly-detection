@@ -60,7 +60,7 @@ app.include_router(router)
 
 @app.get("/find")
 async def root(data: DataRequest | None = None):
-    #data =  
+    data = data.dict()
     if data is None:
         data = {'models': ['Autoencoder', 'Isolation Forest', 'Prophet'], 'column_name': 'web_response'}
     if 'data_source' not in data:
