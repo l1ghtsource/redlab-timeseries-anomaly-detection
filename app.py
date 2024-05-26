@@ -235,7 +235,7 @@ def main():
             client = clickhouse_connect.get_client(host='83.166.235.106', port=8123)
             result = client.query_df(
                 'SELECT timestamp, web_response, throughput, apdex, error FROM "default"."test2" ORDER BY timestamp ASC')
-            #result.rename(columns={'time': 'timestamp'}, inplace=True)
+            # result.rename(columns={'time': 'timestamp'}, inplace=True)
 
             st.session_state["data"] = result
             st.session_state["state"] = "working"
