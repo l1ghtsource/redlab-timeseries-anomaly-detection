@@ -21,8 +21,8 @@ services:
     restart: unless-stopped
     labels:
      - traefik.enable=true
-     - traefik.http.routers.api.rule=Host(`prezoy.itatmisis.ru`)
-     - traefik.http.middlewaresapi.stripprefix.prefixes=/api"
+     - traefik.http.routers.api.rule=Host(`prezoy.itatmisis.ru`) && PathPrefix(`/api`)
+     - traefik.http.middlewares.api.stripprefix.prefixes=/api"
      - traefik.http.routers.api.entrypoints=websecure, web
      - traefik.http.routers.api.tls=true
      - traefik.http.routers.api.tls.certresolver=le
