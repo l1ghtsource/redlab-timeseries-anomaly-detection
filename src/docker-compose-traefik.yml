@@ -1,21 +1,4 @@
 services:
-  streamlit:
-    image: rdinit/redlabhack:streamlit
-    ports:
-     - "8501:8501"
-    restart: unless-stopped
-    networks:
-     - internal
-     - web
-    labels:
-     - traefik.enable=true
-     - traefik.http.routers.streamlit.rule=Host(`prezoy.itatmisis.ru`)
-     - traefik.http.routers.streamlit.entrypoints=websecure, web
-     - traefik.http.routers.streamlit.tls=true
-     - traefik.http.routers.streamlit.tls.certresolver=le
-     - traefik.http.services.streamlit.loadbalancer.server.port=8501
-     - traefik.docker.network=web  
-
   api:
     image: rdinit/redlabhack:api
     ports:
@@ -35,24 +18,49 @@ services:
      - traefik.http.routers.api.tls.certresolver=le
      - traefik.http.services.api.loadbalancer.server.port=8000
      - traefik.docker.network=web   
+
+  streamlit:
+    image: rdinit/redlabhack:streamlit
+    ports:
+     - "8501:8501"
+    restart: unless-stopped
+    networks:
+     - internal
+     - web
+    labels:
+     - traefik.enable=true
+     - traefik.http.routers.streamlit.rule=Host(`prezoy.itatmisis.ru`)
+     - traefik.http.routers.streamlit.entrypoints=websecure, web
+     - traefik.http.routers.streamlit.tls=true
+     - traefik.http.routers.streamlit.tls.certresolver=le
+     - traefik.http.services.streamlit.loadbalancer.server.port=8501
+     - traefik.docker.network=web  
+
+  
      
 
   ml1:
     image: rdinit/redlabhack:ml1
     depends_on:
      - kafka
+    networks:
+     - internal
     restart: unless-stopped
 
   ml2:
     image: rdinit/redlabhack:ml2
     depends_on:
      - kafka
+    networks:
+     - internal
     restart: unless-stopped
 
   ml3:
     image: rdinit/redlabhack:ml3
     depends_on:
      - kafka
+    networks:
+     - internal
     restart: unless-stopped
     
 
@@ -62,6 +70,8 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     restart: unless-stopped
+    networks:
+     - internal
     #ports:
     #  - 22181:2181
   
@@ -71,6 +81,8 @@ services:
      - zookeeper
     #ports:
     #  - 29092:29092
+    networks:
+     - internal
     restart: unless-stopped
     environment:
       KAFKA_BROKER_ID: 1
