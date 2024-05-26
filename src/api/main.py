@@ -1,12 +1,25 @@
 import asyncio
 from fastapi import FastAPI, Depends
 from pydantic import BaseModel
+from typing import List
 import uvicorn
 
 from faststream.kafka.fastapi import KafkaRouter, Logger
 
 router = KafkaRouter("kafka:9092", max_request_size=16000000)
 
+class DataRequest(BaseModel):
+    models: List[str] = ['Autoencoder', 'Isolation Forest', 'Prophet']
+    column_name:str = 'web_response'
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {'models': ['Autoencoder', 'Isolation Forest', 'Prophet'],
+                 'column_name': 'web_response',
+                 'data_source': {'host' : 'clickhouse_url', 'port': '8123', 'query': 'SELECT timestamp, web_response FROM "default"."test2" ORDER BY timestamp ASC'}}
+            ]
+        }
+    }
 
 responses_ml1 = dict()
 responses_ml2 = dict()
@@ -39,11 +52,14 @@ async def from_ml3(data, msg_id,d=Depends(call)):
     else:
         responses_ml3[msg_id] = data
 
-app = FastAPI(lifespan=router.lifespan_context)
+app = FastAPI(lifespan=router.lifespan_context,
+        description='Метод /find для получения всех аномалий, на вход принимает название колонки и модели \
+            с помощью которых будет производиться обработка. необязательный параметр data_source указывает на \
+                источник данных в ClickHouse, по умолчанию берутся данные из датасета')
 app.include_router(router)
 
 @app.get("/find")
-async def root(data: dict | None = None):
+async def root(data: DataRequest | None = None):
     #data =  
     if data is None:
         data = {'models': ['Autoencoder', 'Isolation Forest', 'Prophet'], 'column_name': 'web_response'}

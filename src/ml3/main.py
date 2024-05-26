@@ -7,7 +7,6 @@ import clickhouse_connect
 
 broker = KafkaBroker("kafka:9092", max_request_size=16000000)
 import pandas as pd
-
 from prophet import Prophet
 
 
