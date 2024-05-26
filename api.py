@@ -1,3 +1,5 @@
+## НЕ ИСПОЛЬУЗЕТСЯ, ТЕКУЩАЯ ВЕРСИЯ В src/api !!!
+
 from fastapi import FastAPI, File, UploadFile, HTTPException, Response
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
