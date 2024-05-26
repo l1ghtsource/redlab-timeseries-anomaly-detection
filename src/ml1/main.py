@@ -39,14 +39,22 @@ class AnomaliesAER:
         return self.anomalies
 
 default_client = clickhouse_connect.get_client(host='83.166.235.106', port=8123)
-timeseries_all = default_client.query_df('SELECT timestamp as time, web_response, throughput, apdex, error FROM "default"."test2" ORDER BY time ASC')
-timeseries_all.rename(columns={'time': 'timestamp'}, inplace=True)
+default_timeseries = default_client.query_df('SELECT timestamp, web_response, throughput, apdex, error FROM "default"."test2" ORDER BY timestamp ASC')
+#default_timeseries.rename(columns={'time': 'timestamp'}, inplace=True)
 
 @broker.subscriber("to_ml1")
 @broker.publisher("from_ml1")
 async def base_handler(body):
     if body['data_source'] == 'default':
-       pass
+       timeseries_all = default_timeseries
+    else:
+        host = body['data_source']['host']
+        port = body['data_source']['port']
+        query = body['data_source']['query']
+
+        client = clickhouse_connect.get_client(host=host, port=port)
+        timeseries_all = default_client.query_df(query)
+        #timeseries_all.rename(columns={timestamp_column: 'timestamp'}, inplace=True)
     
     #numeric_columns = timeseries_all.select_dtypes(include=['float', 'int'])
     #numeric_column_names = numeric_columns.columns.tolist()

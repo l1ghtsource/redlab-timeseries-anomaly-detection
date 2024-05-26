@@ -48,16 +48,22 @@ class ProphetDetector:
 
 
 
+
 default_client = clickhouse_connect.get_client(host='83.166.235.106', port=8123)
-timeseries_all = default_client.query_df('SELECT timestamp as time, web_response, throughput, apdex, error FROM "default"."test2" ORDER BY time ASC')
-timeseries_all.rename(columns={'time': 'timestamp'}, inplace=True)
+default_timeseries = default_client.query_df('SELECT timestamp, web_response, throughput, apdex, error FROM "default"."test2" ORDER BY timestamp ASC')
 
 @broker.subscriber("to_ml3")
 @broker.publisher("from_ml3")
 async def base_handler(body):
     if body['data_source'] == 'default':
-       pass
-    
+       timeseries_all = default_timeseries
+    else:
+        host = body['data_source']['host']
+        port = body['data_source']['port']
+        query = body['data_source']['query']
+
+        client = clickhouse_connect.get_client(host=host, port=port)
+        timeseries_all = default_client.query_df(query)
     
     selected_value = body['column_name']
     timeseries = pd.concat([timeseries_all['timestamp'], timeseries_all[selected_value]], axis=1)

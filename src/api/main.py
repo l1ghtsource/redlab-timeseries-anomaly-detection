@@ -47,6 +47,8 @@ async def root(data: dict | None = None):
     #data =  
     if data is None:
         data = {'models': ['Autoencoder', 'Isolation Forest', 'Prophet'], 'column_name': 'web_response'}
+    if 'data_source' not in data:
+        data['data_source'] = 'default'
     #print('DATA:          ', data)
     #return data
     msg_id = max([len(responses_ml1), len(responses_ml2), len(responses_ml3)])
@@ -54,11 +56,11 @@ async def root(data: dict | None = None):
     responses_ml2[msg_id] = 'pending'
     responses_ml3[msg_id] = 'pending'
     if 'Autoencoder' in data['models']:
-        await router.broker.publish({"msg_id": msg_id, 'column_name': data['column_name'], 'data_source': 'default'}, "to_ml1")
+        await router.broker.publish({"msg_id": msg_id, 'column_name': data['column_name'], 'data_source': data['data_source']}, "to_ml1")
     if 'Isolation Forest' in data['models']:
-        await router.broker.publish({"msg_id": msg_id, 'column_name': data['column_name'], 'data_source': 'default'}, "to_ml2")
+        await router.broker.publish({"msg_id": msg_id, 'column_name': data['column_name'], 'data_source': data['data_source']}, "to_ml2")
     if 'Prophet' in data['models']:
-        await router.broker.publish({"msg_id": msg_id, 'column_name': data['column_name'], 'data_source': 'default'}, "to_ml3")
+        await router.broker.publish({"msg_id": msg_id, 'column_name': data['column_name'], 'data_source': data['data_source']}, "to_ml3")
     try:
         async with asyncio.timeout(120):
             while True:

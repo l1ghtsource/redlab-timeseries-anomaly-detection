@@ -37,8 +37,8 @@ async def detect_anomalies(start: str, end: str):
     try:
         client = clickhouse_connect.get_client(host='83.166.235.106', port=8123)
         timeseries = client.query_df(
-            f'SELECT timestamp as time, web_response, throughput, apdex, error FROM "default"."test2" ORDER BY time ASC')
-        timeseries.rename(columns={'time': 'timestamp'}, inplace=True)
+            f'SELECT timestamp as time, web_response, throughput, apdex, error FROM "default"."test2" ORDER BY timestamp ASC')
+        #timeseries.rename(columns={'time': 'timestamp'}, inplace=True)
 
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Не удалось извлечь данные из БД: {e}")
