@@ -19,7 +19,7 @@ services:
      - traefik.http.routers.api.tls=true
      - traefik.http.routers.api.tls.certresolver=le
      - traefik.http.services.api.loadbalancer.server.port=8000
-     - traefik.docker.network=web   
+     - traefik.docker.network=web
 
   streamlit:
     image: rdinit/redlabhack:streamlit
