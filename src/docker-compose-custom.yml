@@ -1,12 +1,16 @@
 services:
   streamlit:
-    image: rdinit/redlabhack:streamlit
+    build:
+      dockerfile: Dockerfile
+      context: streamlit
     ports:
      - "8501:8501"
     restart: unless-stopped
 
   api:
-    image: rdinit/redlabhack:api
+    build:
+      dockerfile: Dockerfile
+      context: api
     ports:
      - "8000:8000"
     depends_on:
@@ -14,19 +18,25 @@ services:
     restart: unless-stopped
 
   ml1:
-    image: rdinit/redlabhack:ml1
+    build:
+      dockerfile: Dockerfile
+      context: ml1
     depends_on:
       - kafka
     restart: unless-stopped
 
   ml2:
-    image: rdinit/redlabhack:ml2
+    build:
+      dockerfile: Dockerfile
+      context: ml2
     depends_on:
       - kafka
     restart: unless-stopped
 
   ml3:
-    image: rdinit/redlabhack:ml3
+    build:
+      dockerfile: Dockerfile
+      context: ml3
     depends_on:
       - kafka
     restart: unless-stopped
