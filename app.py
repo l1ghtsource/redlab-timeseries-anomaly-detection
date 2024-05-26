@@ -1,3 +1,5 @@
+# НЕ ИСПОЛЬЗУЕТСЯ, ТЕКУЩАЯ ВЕРСИЯ в src/streamlit !!!
+
 import clickhouse_connect
 import streamlit as st
 import pandas as pd
