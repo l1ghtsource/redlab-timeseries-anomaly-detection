@@ -102,7 +102,7 @@ async def root(data: DataRequest | None = None):
 
     m1 = responses_ml1[msg_id]
     m2 = responses_ml2[msg_id]
-    m3 = responses_ml2[msg_id]
+    m3 = responses_ml3[msg_id]
 
     responses_ml1[msg_id] = 0
     responses_ml2[msg_id] = 0

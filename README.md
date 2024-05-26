@@ -11,9 +11,11 @@ Team Members:
 
 Презентация: [link](https://drive.google.com/)
 
-Frontend: link
+Frontend: [prezoy.itatmisis.ru](https://prezoy.itatmisis.ru/)
 
-API: link
+API: 
+[https://prezoy.itatmisis.ru/api/docs]
+[http://prezoy.itatmisis.ru:8000/]
 
 ## Задача трека "Разработка модели для выявления аномалий во временном ряду"
 

@@ -157,7 +157,7 @@ def find_anomalies(method, timeseries, start, end, selected_value):
         return anomalies_df
 
     elif method == 'Prophet':
-        anomalies_df = find_anomalies_prophet(timeseries)
+        anomalies_df = find_anomalies_prophet(selected_value)
 
         anomalies_df = anomalies_df[(pd.to_datetime(anomalies_df['timestamp']) >= start)
                                     & (pd.to_datetime(anomalies_df['timestamp']) <= end)]
@@ -347,7 +347,7 @@ def main():
         else:
             start_datetime = st.session_state["start"]
             end_datetime = st.session_state["end"]
-            results = find_anomalies('Multidimensional', timeseries_all, start_datetime, end_datetime)
+            results = find_anomalies('Multidimensional', timeseries_all, start_datetime, end_datetime, 'selected_value')
 
             min_date = pd.to_datetime(timeseries_all['timestamp'].min())
             max_date = pd.to_datetime(timeseries_all['timestamp'].max())
