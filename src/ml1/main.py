@@ -1,3 +1,5 @@
+from orion import Orion
+import pandas as pd
 from faststream import FastStream
 from faststream.kafka import KafkaBroker
 from time import time, sleep
@@ -6,8 +8,7 @@ import clickhouse_connect
 
 
 broker = KafkaBroker("kafka:9092", max_request_size=16000000)
-import pandas as pd
-from orion import Orion
+
 
 class AnomaliesAER:
     def __init__(self, data):
@@ -38,15 +39,18 @@ class AnomaliesAER:
 
         return self.anomalies
 
+
 default_client = clickhouse_connect.get_client(host='83.166.235.106', port=8123)
-default_timeseries = default_client.query_df('SELECT timestamp, web_response, throughput, apdex, error FROM "default"."test2" ORDER BY timestamp ASC')
-#default_timeseries.rename(columns={'time': 'timestamp'}, inplace=True)
+default_timeseries = default_client.query_df(
+    'SELECT timestamp, web_response, throughput, apdex, error FROM "default"."test2" ORDER BY timestamp ASC')
+# default_timeseries.rename(columns={'time': 'timestamp'}, inplace=True)
+
 
 @broker.subscriber("to_ml1")
 @broker.publisher("from_ml1")
 async def base_handler(body):
     if body['data_source'] == 'default':
-       timeseries_all = default_timeseries
+        timeseries_all = default_timeseries
     else:
         host = body['data_source']['host']
         port = body['data_source']['port']
@@ -54,11 +58,11 @@ async def base_handler(body):
 
         client = clickhouse_connect.get_client(host=host, port=port)
         timeseries_all = default_client.query_df(query)
-        #timeseries_all.rename(columns={timestamp_column: 'timestamp'}, inplace=True)
-    
-    #numeric_columns = timeseries_all.select_dtypes(include=['float', 'int'])
-    #numeric_column_names = numeric_columns.columns.tolist()
-    
+        # timeseries_all.rename(columns={timestamp_column: 'timestamp'}, inplace=True)
+
+    # numeric_columns = timeseries_all.select_dtypes(include=['float', 'int'])
+    # numeric_column_names = numeric_columns.columns.tolist()
+
     selected_value = body['column_name']
     timeseries = pd.concat([timeseries_all['timestamp'], timeseries_all[selected_value]], axis=1)
     timeseries.rename(columns={selected_value: 'value'}, inplace=True)
@@ -66,6 +70,6 @@ async def base_handler(body):
     aer = AnomaliesAER(timeseries)
     anomalies = pd.DataFrame(aer.detect_anomalies())
 
-    return {'time':time(), "msg_id": body['msg_id'], 'data': str(anomalies.to_csv())}
+    return {'time': time(), "msg_id": body['msg_id'], 'data': str(anomalies.to_csv())}
 
 app = FastStream(broker,  description="Autoencoder")

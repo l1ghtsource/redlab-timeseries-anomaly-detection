@@ -2,69 +2,65 @@ services:
   api:
     image: rdinit/redlabhack:api
     ports:
-     - "8000:8000"
+      - '8000:8000'
     depends_on:
-     - kafka
+      - kafka
     restart: unless-stopped
     networks:
-     - internal
-     - web
+      - internal
+      - web
     labels:
-     - traefik.enable=true
-     - traefik.http.routers.api.rule=Host(`prezoy.itatmisis.ru`) && PathPrefix(`/api/`)
-     - traefik.http.middlewares.api-strip.stripprefix.prefixes=/api/
-     - traefik.http.middlewares.api-strip.stripprefix.forceslash=false
-     - traefik.http.routers.api.middlewares=api-strip
-     - traefik.http.routers.api.entrypoints=websecure, web
-     - traefik.http.routers.api.tls=true
-     - traefik.http.routers.api.tls.certresolver=le
-     - traefik.http.services.api.loadbalancer.server.port=8000
-     - traefik.docker.network=web
+      - traefik.enable=true
+      - traefik.http.routers.api.rule=Host(`prezoy.itatmisis.ru`) && PathPrefix(`/api/`)
+      - traefik.http.middlewares.api-strip.stripprefix.prefixes=/api/
+      - traefik.http.middlewares.api-strip.stripprefix.forceslash=false
+      - traefik.http.routers.api.middlewares=api-strip
+      - traefik.http.routers.api.entrypoints=websecure, web
+      - traefik.http.routers.api.tls=true
+      - traefik.http.routers.api.tls.certresolver=le
+      - traefik.http.services.api.loadbalancer.server.port=8000
+      - traefik.docker.network=web
 
   streamlit:
     image: rdinit/redlabhack:streamlit
     ports:
-     - "8501:8501"
+      - '8501:8501'
     restart: unless-stopped
     networks:
-     - internal
-     - web
+      - internal
+      - web
     labels:
-     - traefik.enable=true
-     - traefik.http.routers.streamlit.rule=Host(`prezoy.itatmisis.ru`)
-     - traefik.http.routers.streamlit.entrypoints=websecure, web
-     - traefik.http.routers.streamlit.tls=true
-     - traefik.http.routers.streamlit.tls.certresolver=le
-     - traefik.http.services.streamlit.loadbalancer.server.port=8501
-     - traefik.docker.network=web  
-
-  
-     
+      - traefik.enable=true
+      - traefik.http.routers.streamlit.rule=Host(`prezoy.itatmisis.ru`)
+      - traefik.http.routers.streamlit.entrypoints=websecure, web
+      - traefik.http.routers.streamlit.tls=true
+      - traefik.http.routers.streamlit.tls.certresolver=le
+      - traefik.http.services.streamlit.loadbalancer.server.port=8501
+      - traefik.docker.network=web
 
   ml1:
     image: rdinit/redlabhack:ml1
     depends_on:
-     - kafka
+      - kafka
     networks:
-     - internal
+      - internal
     restart: unless-stopped
 
   ml2:
     image: rdinit/redlabhack:ml2
     depends_on:
-     - kafka
+      - kafka
     networks:
-     - internal
+      - internal
     restart: unless-stopped
 
   ml3:
     image: rdinit/redlabhack:ml3
     depends_on:
-     - kafka
+      - kafka
     networks:
-     - internal
+      - internal
     restart: unless-stopped
-    
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.4
@@ -73,18 +69,18 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     restart: unless-stopped
     networks:
-     - internal
+      - internal
     #ports:
     #  - 22181:2181
-  
+
   kafka:
     image: confluentinc/cp-kafka:7.4.4
     depends_on:
-     - zookeeper
+      - zookeeper
     #ports:
     #  - 29092:29092
     networks:
-     - internal
+      - internal
     restart: unless-stopped
     environment:
       KAFKA_BROKER_ID: 1

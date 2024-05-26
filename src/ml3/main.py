@@ -1,3 +1,5 @@
+from prophet import Prophet
+import pandas as pd
 from faststream import FastStream
 from faststream.kafka import KafkaBroker
 from time import time, sleep
@@ -6,8 +8,6 @@ import clickhouse_connect
 
 
 broker = KafkaBroker("kafka:9092", max_request_size=16000000)
-import pandas as pd
-from prophet import Prophet
 
 
 class ProphetDetector:
@@ -46,16 +46,16 @@ class ProphetDetector:
         return preds
 
 
-
-
 default_client = clickhouse_connect.get_client(host='83.166.235.106', port=8123)
-default_timeseries = default_client.query_df('SELECT timestamp, web_response, throughput, apdex, error FROM "default"."test2" ORDER BY timestamp ASC')
+default_timeseries = default_client.query_df(
+    'SELECT timestamp, web_response, throughput, apdex, error FROM "default"."test2" ORDER BY timestamp ASC')
+
 
 @broker.subscriber("to_ml3")
 @broker.publisher("from_ml3")
 async def base_handler(body):
     if body['data_source'] == 'default':
-       timeseries_all = default_timeseries
+        timeseries_all = default_timeseries
     else:
         host = body['data_source']['host']
         port = body['data_source']['port']
@@ -63,7 +63,7 @@ async def base_handler(body):
 
         client = clickhouse_connect.get_client(host=host, port=port)
         timeseries_all = default_client.query_df(query)
-    
+
     selected_value = body['column_name']
     timeseries = pd.concat([timeseries_all['timestamp'], timeseries_all[selected_value]], axis=1)
     timeseries.rename(columns={selected_value: 'value'}, inplace=True)
@@ -71,7 +71,6 @@ async def base_handler(body):
     detector = ProphetDetector()
     anomalies = detector.fit_predict(timeseries)
 
-
-    return {'time':time(), "msg_id": body['msg_id'], 'data': str(anomalies.to_csv())}
+    return {'time': time(), "msg_id": body['msg_id'], 'data': str(anomalies.to_csv())}
 
 app = FastStream(broker,  description="Prophet")
