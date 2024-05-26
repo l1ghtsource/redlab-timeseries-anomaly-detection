@@ -4,6 +4,9 @@ services:
     ports:
      - "8501:8501"
     restart: unless-stopped
+    networks:
+     - internal
+     - web
     labels:
      - traefik.enable=true
      - traefik.http.routers.streamlit.rule=Host(`prezoy.itatmisis.ru`)
@@ -11,6 +14,7 @@ services:
      - traefik.http.routers.streamlit.tls=true
      - traefik.http.routers.streamlit.tls.certresolver=le
      - traefik.http.services.streamlit.loadbalancer.server.port=8501
+     - traefik.docker.network=web  
 
   api:
     image: rdinit/redlabhack:api
@@ -19,6 +23,9 @@ services:
     depends_on:
      - kafka
     restart: unless-stopped
+    networks:
+     - internal
+     - web
     labels:
      - traefik.enable=true
      - traefik.http.routers.api.rule=Host(`prezoy.itatmisis.ru`) && PathPrefix(`/api`)
@@ -27,6 +34,8 @@ services:
      - traefik.http.routers.api.tls=true
      - traefik.http.routers.api.tls.certresolver=le
      - traefik.http.services.api.loadbalancer.server.port=8000
+     - traefik.docker.network=web   
+     
 
   ml1:
     image: rdinit/redlabhack:ml1
@@ -72,3 +81,9 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_MESSAGE_MAX_BYTES: 10000000
       KAFKA_SOCKET_REQUEST_MAX_BYTES: 100001200
+
+networks:
+  web:
+    external: true
+  internal:
+    external: false
