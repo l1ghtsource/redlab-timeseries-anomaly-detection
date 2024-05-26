@@ -35,7 +35,7 @@ Cлепок данных телеметрии реальной системы д
 
 - [AER: Auto-Encoder with Regression for Time Series Anomaly Detection](https://arxiv.org/pdf/2212.13558) - SOTA решение для поиска аномалий во временных рядах, хорошо работает с сезонностями, трендами
 
-![aer_vs_all](aer_vs_all.pg)
+![aer_vs_all](aer_vs_all.png)
 
 - Prophet - качественная детекция аномалий на основе предсказаний и доверительного интервала
 
