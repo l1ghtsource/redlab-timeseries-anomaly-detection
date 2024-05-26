@@ -243,8 +243,8 @@ def main():
 
     if state == "initial":
         st.title('📉 Поиск Аномалий во Временных Рядах')
-
-        uploaded_file = st.file_uploader("Выберите CSV файл", type=['csv'])
+        uploaded_file = st.file_uploader("Выберите CSV файл (недоступно, используется ClickHouse)", type=['csv'], disabled=True)
+        #uploaded_file = st.file_uploader("Выберите CSV файл", type=['csv'])
         if uploaded_file is not None:
             st.session_state["data"] = pd.read_csv(uploaded_file)
             st.session_state["state"] = "working"
