@@ -14,8 +14,8 @@ Team Members:
 Frontend: [prezoy.itatmisis.ru](https://prezoy.itatmisis.ru/)
 
 API: 
-[https://prezoy.itatmisis.ru/api/docs]
-[http://prezoy.itatmisis.ru:8000/]
+[prezoy.itatmisis.ru/api](https://prezoy.itatmisis.ru/api/)
+[prezoy.itatmisis.ru:8000/docs](http://prezoy.itatmisis.ru:8000/docs)
 
 ## Задача трека "Разработка модели для выявления аномалий во временном ряду"
 
