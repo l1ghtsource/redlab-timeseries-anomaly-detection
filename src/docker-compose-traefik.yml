@@ -10,7 +10,7 @@ services:
      - traefik.http.routers.streamlit.entrypoints=websecure, web
      - traefik.http.routers.streamlit.tls=true
      - traefik.http.routers.streamlit.tls.certresolver=le
-     - traefik.http.services.streamlit.loadbalancer.server.port=8501
+     - traefik.port=8501
 
   api:
     image: rdinit/redlabhack:api
@@ -26,7 +26,7 @@ services:
      - traefik.http.routers.api.entrypoints=websecure, web
      - traefik.http.routers.api.tls=true
      - traefik.http.routers.api.tls.certresolver=le
-     - traefik.http.services.api.loadbalancer.server.port=8000
+     - traefik.port=8000
 
   ml1:
     image: rdinit/redlabhack:ml1
