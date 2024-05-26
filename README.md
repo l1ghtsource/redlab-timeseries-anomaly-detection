@@ -9,7 +9,7 @@ Team Members:
 4) **Кадомцев Андрей** - ML Engineer
 5) **Силаев Всеволод** - ML Engineer
 
-Презентация: [link](https://drive.google.com/)
+Презентация: [link](https://drive.google.com/file/d/1Al3mR0H14nVoiqXrBmOZn6YT9t7fl7D7/view?usp=sharing)
 
 Frontend: [prezoy.itatmisis.ru](https://prezoy.itatmisis.ru/)
 
