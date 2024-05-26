@@ -7,7 +7,7 @@ services:
     labels:
      - traefik.enable=true
      - traefik.http.routers.streamlit.rule=Host(`prezoy.itatmisis.ru`)
-     - traefik.http.routers.streamlit.entrypoints=websecure
+     - traefik.http.routers.streamlit.entrypoints=websecure, web
      - traefik.http.routers.streamlit.tls=true
      - traefik.http.routers.streamlit.tls.certresolver=le
      - traefik.http.services.streamlit.loadbalancer.server.port=8501
@@ -23,7 +23,7 @@ services:
      - traefik.enable=true
      - traefik.http.routers.api.rule=Host(`prezoy.itatmisis.ru`)
      - traefik.http.middlewaresapi.stripprefix.prefixes=/api"
-     - traefik.http.routers.api.entrypoints=websecure
+     - traefik.http.routers.api.entrypoints=websecure, web
      - traefik.http.routers.api.tls=true
      - traefik.http.routers.api.tls.certresolver=le
      - traefik.http.services.api.loadbalancer.server.port=8000
